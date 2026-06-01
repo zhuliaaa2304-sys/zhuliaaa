@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貪食蛇遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            padding-top: 30px;
+        }
+        .game-container {
+            background-color: white;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .score-board {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        canvas {
+            background-color: #111;
+            display: block;
+            margin: 0 auto;
+            border-radius: 5px;
+        }
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🐍 歡迎來到貪食蛇遊戲！ 🐍</h1>
+    <div class="score-board">
+        📊 目前分數: <span id="score">0</span>
+    </div>
+    
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    
+    <div class="instructions">
+        💡 提示：使用鍵盤的 <b>↑ ↓ ← →</b> 鍵來控制蛇的方向！
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+
+    let snake = [{x: 10, y: 10}];
+    let food = {x: 5, y: 5};
+    let dx = 1;
+    let dy = 0;
+    let score = 0;
+    let gameInterval;
+
+    function main() {
+        if (hasGameEnded()) {
+            alert(`遊戲結束！你的最終分數是: ${score}`);
+            resetGame();
+            return;
+        }
+
+        clearCanvas();
+        drawFood();
+        moveSnake();
+        drawSnake();
+    }
+
+    gameInterval = setInterval(main, 100);
+    document.addEventListener("keydown", changeDirection);
+
+    function clearCanvas() {
+        ctx.fillStyle = "#111";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawSnake() {
+        ctx.fillStyle = "#4CAF50";
+        snake.forEach(part => {
+            ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+        });
+    }
+
+    function moveSnake() {
+        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+        snake.unshift(head);
+
+        if (head.x === food.x && head.y === food.y) {
+            score += 1;
+            document.getElementById("score").innerText = score;
+            generateFood();
+        } else {
+            snake.pop();
+        }
+    }
+
+    function generateFood() {
+        food.x = Math.floor(Math.random() * tileCount);
+        food.y = Math.floor(Math.random() * tileCount);
+    }
+
+    function drawFood() {
+        ctx.fillStyle = "#f44336";
+        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+
+    function changeDirection(event) {
+        const keyPressed = event.keyCode;
+        const GO_UP = 38;
+        const GO_DOWN = 40;
+        const GO_LEFT = 37;
+        const GO_RIGHT = 39;
+
+        if (keyPressed === GO_LEFT && dx === 0) { dx = -1; dy = 0; }
+        if (keyPressed === GO_UP && dy === 0) { dx = 0; dy = -1; }
+        if (keyPressed === GO_RIGHT && dx === 0) { dx = 1; dy = 0; }
+        if (keyPressed === GO_DOWN && dy === 0) { dx = 0; dy = 1; }
+    }
+
+    function hasGameEnded() {
+        if (snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount) {
+            return true;
+        }
+        for (let i = 1; i < snake.length; i++) {
+            if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+        }
+        return false;
+    }
+
+    function resetGame() {
+        snake = [{x: 10, y: 10}];
+        food = {x: 5, y: 5};
+        dx = 1;
+        dy = 0;
+        score = 0;
+        document.getElementById("score").innerText = score;
+    }
+</script>
+
+</body>
+</html>
